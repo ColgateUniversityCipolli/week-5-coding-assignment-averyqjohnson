@@ -87,36 +87,26 @@ view(df_results)
 ##############################################################################
 
 #substep 1
-essentia_model <- read.csv(paste("EssentiaOutput", "EssentiaModelOutput.csv", sep="/"))
+essentia_model <- read_csv("EssentiaOutput/EssentiaModelOutput.csv")
 
-#substep 2
-essentia_model$valence <- rowMeans(essentia_model[,c("deam_valence", "emo_valence", "muse_valence")])
-essentia_model$arousal <- rowMeans(essentia_model[ , c("deam_arousal", "emo_arousal", "muse_arousal")])
+cleaned_essentia <- essentia_model |>
+  mutate(
+    valence = rowMeans(essentia_model[,c("deam_valence", "emo_valence", "muse_valence")]),
+    arousal = rowMeans(essentia_model[ , c("deam_arousal", "emo_arousal", "muse_arousal")]),
+    aggressive = rowMeans(essentia_model[,c("eff_aggressive", "nn_aggressive")]),
+    happy = rowMeans(essentia_model[,c("eff_happy", "nn_happy")]),
+    party = rowMeans(essentia_model[,c("eff_party", "nn_party")]),
+    relax = rowMeans(essentia_model[,c("eff_relax", "nn_relax")]),
+    sad = rowMeans(essentia_model[,c("eff_sad", "nn_sad")]),
+    acoustic = rowMeans(essentia_model[,c("eff_acoustic", "nn_acoustic")]),
+    electronic = rowMeans(essentia_model[,c("eff_electronic", "nn_electronic")]),
+    instrumental = rowMeans(essentia_model[,c("eff_instrumental", "nn_instrumental")])
+  ) |>
+  rename(timbreBright = eff_timbre_bright) |>
+  select(artist, album, track, valence, arousal, aggressive, happy, party,
+         relax, sad, acoustic, electronic, instrumental, timbreBright)
 
-#substep 3
-essentia_model$aggressive <- rowMeans(essentia_model[,c("eff_aggressive", "nn_aggressive")])
-essentia_model$happy <- rowMeans(essentia_model[,c("eff_happy", "nn_happy")])
-essentia_model$party <- rowMeans(essentia_model[,c("eff_party", "nn_party")])
-essentia_model$relax <- rowMeans(essentia_model[,c("eff_relax", "nn_relax")])
-essentia_model$sad <- rowMeans(essentia_model[,c("eff_sad", "nn_sad")])
-
-#substep 4
-essentia_model$acoustic <- rowMeans(essentia_model[,c("eff_acoustic", "nn_acoustic")])
-essentia_model$electronic <- rowMeans(essentia_model[,c("eff_electronic", "nn_electronic")])
-
-#substep 5
-essentia_model$instrumental <- rowMeans(essentia_model[,c("eff_instrumental", "nn_instrumental")])
-
-#substep 6
-colnames(essentia_model)[colnames(essentia_model) == "eff_timbre_bright"] <- "timbreBright" #renametherow
-
-#substep 7
-cleaned_essentia <- essentia_model[ , c("artist", "album", "track", "valence", 
-                                        "arousal","aggressive", "happy", "party",
-                                        "relax", "sad", "acoustic", "electronic",
-                                        "instrumental", "timbreBright")]
 View(cleaned_essentia)
-dim(cleaned_essentia)
 
 ##############################################################################
 # Step 4: Load the data from LIWC and compile the full dataset
