@@ -1,0 +1,220 @@
+\documentclass{article}\usepackage[]{graphicx}\usepackage[]{xcolor}
+% maxwidth is the original width if it is less than linewidth
+% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlsng}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hldef}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\usepackage[margin=1.0in]{geometry} % To set margins
+\usepackage{amsmath}  % This allows me to use the align functionality.
+                      % If you find yourself trying to replicate
+                      % something you found online, ensure you're
+                      % loading the necessary packages!
+\usepackage{amsfonts} % Math font
+\usepackage{fancyvrb}
+\usepackage{hyperref} % For including hyperlinks
+\usepackage[shortlabels]{enumitem}% For enumerated lists with labels specified
+                                  % We had to run tlmgr_install("enumitem") in R
+\usepackage{float}    % For telling R where to put a table/figure
+\usepackage{natbib}        %For the bibliography
+\bibliographystyle{apalike}%For the bibliography
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+\begin{enumerate}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% QUESTION 1
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item In Lab 3, you wrangled data from Essentia, Essentia models and LIWC. Rework your 
+solution to Lab 3 using \texttt{tidyverse} \citep{tidyverse} instead of base \texttt{R}.
+Specifically, rewrite your code for steps 1-4 of task 2 using \texttt{tidyverse} \citep{tidyverse}. 
+Make sure to address any issues I noted in your code file, and ensure that your code 
+runs in the directory as it is set up.
+\begin{knitrout}\scriptsize
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{##############################################################################}
+\hlcom{# HW 5}
+\hlcom{# Avery Johnson}
+\hlcom{##############################################################################}
+
+\hlcom{##############################################################################}
+\hlcom{# Code Task: Compile Data from Essentia}
+\hlcom{##############################################################################}
+
+\hlcom{##############################################################################}
+\hlcom{# Step 0: install the stringr and jsonlite packages for R}
+\hlcom{##############################################################################}
+
+\hlkwd{library}\hldef{(}\hlsng{"jsonlite"}\hldef{)}
+\hlkwd{library}\hldef{(}\hlsng{"tidyverse"}\hldef{)}
+
+\hlcom{##############################################################################}
+\hlcom{# Step 1: Work with the song Au Revoir on the Talon of the Hawk album}
+\hlcom{##############################################################################}
+
+\hlcom{#Substep 1}
+\hldef{current.filename} \hlkwb{<-} \hlsng{"The Front Bottoms-Talon Of The Hawk-Au Revoir (Adios).json"}
+
+\hlcom{#Substep 2}
+\hldef{file_parts} \hlkwb{<-} \hlkwd{str_split}\hldef{(current.filename,} \hlsng{"-"}\hldef{,} \hlkwc{simplify}\hldef{=}\hlnum{TRUE}\hldef{)}
+\hldef{artist} \hlkwb{<-} \hldef{file_parts[}\hlnum{1}\hldef{]}
+\hldef{album} \hlkwb{<-} \hldef{file_parts[}\hlnum{2}\hldef{]}
+\hldef{track} \hlkwb{<-} \hldef{file_parts [}\hlnum{3}\hldef{]}
+\hldef{track} \hlkwb{<-} \hldef{file_parts[}\hlnum{3}\hldef{] |>}
+  \hlkwd{str_remove}\hldef{(}\hlsng{".json$"}\hldef{)}
+
+\hlcom{#Substep 3}
+\hldef{json_data} \hlkwb{<-} \hlkwd{fromJSON}\hldef{(}\hlkwd{file.path}\hldef{(}\hlsng{"EssentiaOutput"}\hldef{, current.filename))}
+
+\hlcom{#Substep 4}
+\hldef{overall_loudness} \hlkwb{<-} \hldef{json_data}\hlopt{$}\hldef{loudness_ebu128}\hlopt{$}\hldef{integrated}
+\hldef{spectral_energy} \hlkwb{<-} \hldef{json_data}\hlopt{$}\hldef{lowlevel}\hlopt{$}\hldef{spectral_energy}
+\hldef{dissonance} \hlkwb{<-} \hldef{json_data}\hlopt{$}\hldef{lowlevel}\hlopt{$}\hldef{dissonance}
+\hldef{pitch_salience} \hlkwb{<-} \hldef{json_data}\hlopt{$}\hldef{lowlevel}\hlopt{$}\hldef{pitch_salience}
+\hldef{bpm} \hlkwb{<-}\hldef{json_data}\hlopt{$}\hldef{rhythm}\hlopt{$}\hldef{bpm}
+\hldef{beats_loudness} \hlkwb{<-} \hldef{json_data}\hlopt{$}\hldef{rhythm}\hlopt{$}\hldef{beats_loudness}
+\hldef{danceability} \hlkwb{<-} \hldef{json_data}\hlopt{$}\hldef{rhythm}\hlopt{$}\hldef{danceability}
+\hldef{tuning_frequency} \hlkwb{<-} \hldef{json_data}\hlopt{$}\hldef{tonal}\hlopt{$}\hldef{tuning_frequency}
+
+\hlcom{##############################################################################}
+\hlcom{# Step 2: complete step 1 for all .JSON files in the EssentiaOutput Folder}
+\hlcom{##############################################################################}
+
+\hldef{json_files} \hlkwb{<-} \hlkwd{list.files}\hldef{(}\hlsng{"EssentiaOutput"}\hldef{,} \hlkwc{pattern}\hldef{=}\hlsng{"\textbackslash{}\textbackslash{}.json$"}\hldef{,} \hlkwc{full.names}\hldef{=}\hlnum{TRUE}\hldef{)} \hlcom{# Find all JSON files}
+
+\hlcom{# function to extract data in each JSON file}
+\hldef{df_results} \hlkwb{<-} \hldef{json_files} \hlopt{%>%}
+  \hlcom{#map_df applies a function to each element in the json_files list}
+  \hlcom{# .x is a placeholder that represents each element in the list}
+  \hlkwd{map_df}\hldef{(}\hlopt{~}\hldef{\{}
+    \hldef{json_data} \hlkwb{<-} \hlkwd{fromJSON}\hldef{(.x)}
+
+    \hldef{file_parts} \hlkwb{<-} \hlkwd{str_split}\hldef{(}\hlkwd{basename}\hldef{(.x),} \hlsng{"-"}\hldef{,} \hlkwc{simplify}\hldef{=}\hlnum{TRUE}\hldef{)}
+    \hldef{artist} \hlkwb{<-} \hldef{file_parts[}\hlnum{1}\hldef{]}
+    \hldef{album} \hlkwb{<-} \hldef{file_parts[}\hlnum{2}\hldef{]}
+    \hldef{track} \hlkwb{<-} \hldef{file_parts [}\hlnum{3}\hldef{]}
+    \hldef{track} \hlkwb{<-} \hldef{file_parts[}\hlnum{3}\hldef{] |>}
+      \hlkwd{str_remove}\hldef{(}\hlsng{".json$"}\hldef{)}
+
+    \hlcom{#extract the features}
+    \hlkwd{tibble}\hldef{(}
+      \hlkwc{artist} \hldef{= artist,}
+      \hlkwc{album} \hldef{= album,}
+      \hlkwc{track} \hldef{= track,}
+      \hlkwc{overall.loudness} \hldef{= json_data}\hlopt{$}\hldef{lowlevel}\hlopt{$}\hldef{loudness_ebu128}\hlopt{$}\hldef{integrated,}
+      \hlkwc{spectral_energy} \hldef{= json_data}\hlopt{$}\hldef{lowlevel}\hlopt{$}\hldef{spectral_energy,}
+      \hlkwc{dissonance} \hldef{= json_data}\hlopt{$}\hldef{lowlevel}\hlopt{$}\hldef{dissonance,}
+      \hlkwc{pitch_salience} \hldef{= json_data}\hlopt{$}\hldef{lowlevel}\hlopt{$}\hldef{pitch_salience,}
+      \hlkwc{bpm} \hldef{= json_data}\hlopt{$}\hldef{rhythm}\hlopt{$}\hldef{bpm,}
+      \hlkwc{beats_loudness} \hldef{= json_data}\hlopt{$}\hldef{rhythm}\hlopt{$}\hldef{beats_loudness,}
+      \hlkwc{danceability} \hldef{= json_data}\hlopt{$}\hldef{rhythm}\hlopt{$}\hldef{danceability,}
+      \hlkwc{tuning_frequency} \hldef{= json_data}\hlopt{$}\hldef{tonal}\hlopt{$}\hldef{tuning_frequency}
+    \hldef{)}
+
+  \hldef{\})}
+
+
+\hlcom{##############################################################################}
+\hlcom{# Step 3: Load and clean the data from the Essentia models by completing the }
+\hlcom{# following steps}
+\hlcom{##############################################################################}
+
+\hlcom{#substep 1}
+\hldef{essentia_model} \hlkwb{<-} \hlkwd{read_csv}\hldef{(}\hlsng{"EssentiaOutput/EssentiaModelOutput.csv"}\hldef{)}
+
+\hldef{cleaned_essentia} \hlkwb{<-} \hldef{essentia_model |>}
+  \hlkwd{mutate}\hldef{(}
+    \hlkwc{valence} \hldef{=} \hlkwd{rowMeans}\hldef{(essentia_model[,}\hlkwd{c}\hldef{(}\hlsng{"deam_valence"}\hldef{,} \hlsng{"emo_valence"}\hldef{,} \hlsng{"muse_valence"}\hldef{)]),}
+    \hlkwc{arousal} \hldef{=} \hlkwd{rowMeans}\hldef{(essentia_model[ ,} \hlkwd{c}\hldef{(}\hlsng{"deam_arousal"}\hldef{,} \hlsng{"emo_arousal"}\hldef{,} \hlsng{"muse_arousal"}\hldef{)]),}
+    \hlkwc{aggressive} \hldef{=} \hlkwd{rowMeans}\hldef{(essentia_model[,}\hlkwd{c}\hldef{(}\hlsng{"eff_aggressive"}\hldef{,} \hlsng{"nn_aggressive"}\hldef{)]),}
+    \hlkwc{happy} \hldef{=} \hlkwd{rowMeans}\hldef{(essentia_model[,}\hlkwd{c}\hldef{(}\hlsng{"eff_happy"}\hldef{,} \hlsng{"nn_happy"}\hldef{)]),}
+    \hlkwc{party} \hldef{=} \hlkwd{rowMeans}\hldef{(essentia_model[,}\hlkwd{c}\hldef{(}\hlsng{"eff_party"}\hldef{,} \hlsng{"nn_party"}\hldef{)]),}
+    \hlkwc{relax} \hldef{=} \hlkwd{rowMeans}\hldef{(essentia_model[,}\hlkwd{c}\hldef{(}\hlsng{"eff_relax"}\hldef{,} \hlsng{"nn_relax"}\hldef{)]),}
+    \hlkwc{sad} \hldef{=} \hlkwd{rowMeans}\hldef{(essentia_model[,}\hlkwd{c}\hldef{(}\hlsng{"eff_sad"}\hldef{,} \hlsng{"nn_sad"}\hldef{)]),}
+    \hlkwc{acoustic} \hldef{=} \hlkwd{rowMeans}\hldef{(essentia_model[,}\hlkwd{c}\hldef{(}\hlsng{"eff_acoustic"}\hldef{,} \hlsng{"nn_acoustic"}\hldef{)]),}
+    \hlkwc{electronic} \hldef{=} \hlkwd{rowMeans}\hldef{(essentia_model[,}\hlkwd{c}\hldef{(}\hlsng{"eff_electronic"}\hldef{,} \hlsng{"nn_electronic"}\hldef{)]),}
+    \hlkwc{instrumental} \hldef{=} \hlkwd{rowMeans}\hldef{(essentia_model[,}\hlkwd{c}\hldef{(}\hlsng{"eff_instrumental"}\hldef{,} \hlsng{"nn_instrumental"}\hldef{)])}
+  \hldef{) |>}
+  \hlkwd{rename}\hldef{(}\hlkwc{timbreBright} \hldef{= eff_timbre_bright) |>}
+  \hlkwd{select}\hldef{(artist, album, track, valence, arousal, aggressive, happy, party,}
+         \hldef{relax, sad, acoustic, electronic, instrumental, timbreBright)}
+
+\hlcom{##############################################################################}
+\hlcom{# Step 4: Load the data from LIWC and compile the full dataset}
+\hlcom{##############################################################################}
+
+\hlcom{#substep 1}
+\hldef{liwc_output} \hlkwb{<-} \hlkwd{read_csv}\hldef{(}\hlsng{"LIWCOutput/LIWCOutput.csv"}\hldef{)}
+
+\hlcom{# Merge df_results and cleaned_essentia}
+\hldef{merged_df} \hlkwb{<-} \hldef{df_results |>}
+  \hlkwd{left_join}\hldef{(cleaned_essentia) |>}
+  \hlkwd{left_join}\hldef{(liwc_output)}
+
+\hlcom{#substep 3}
+\hldef{merged_df} \hlkwb{<-} \hldef{merged_df |>}
+  \hlkwd{rename}\hldef{(}\hlkwc{funct} \hldef{=} \hlsng{'function'}\hldef{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+In this assignment, I rewrote my lab 3 code using the \texttt{tidyverse} \citep{tidyverse} package
+instead of base R to improve readability and efficiency. To extract data, I used  
+\texttt{str\_split()} and \texttt{str\_remove()} to obtain the artist, album, and track names
+from filenames. Instead of a \texttt{for} loop, I used \texttt{map\_df()} to iterate through
+all JSON files, applying a function to extract and store features in a tibble for cleaner and more
+efficient processing. To clean the model data, I used \texttt{mutate()} to add new columns, along
+with \texttt{rename()} and \texttt{select()} to keep only relevant columns and improve clarity. For merging,
+\texttt{tidyverse} provides a more concise approach by allowing the use of \texttt{left\_join()} multiple times
+within a pipeline. Overall, switching to \texttt{tidyverse} made my code more readable, efficient, and consistent
+while correctly performing all required tasks.
+
+\end{enumerate}
+\bibliography{bibliography}
+\end{document}

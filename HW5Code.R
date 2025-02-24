@@ -125,10 +125,7 @@ merged_df <- df_results |>
 
 # View the merged data frame
 View(merged_df)
-dim(merged_df)
 
 #substep 3
 merged_df <- merged_df |>
   rename(funct = 'function')
-
-"funct" %in% colnames(merged_df)
