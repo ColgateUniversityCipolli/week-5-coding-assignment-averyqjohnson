@@ -51,6 +51,8 @@ json_files <- list.files("EssentiaOutput", pattern="\\.json$", full.names=TRUE) 
 
 # function to extract data in each JSON file
 df_results <- json_files %>%
+  #map_df applies a function to each element in the json_files list
+  # .x is a placeholder that represents each element in the list
   map_df(~{
     json_data <- fromJSON(.x)
     
@@ -113,18 +115,20 @@ View(cleaned_essentia)
 ##############################################################################
 
 #substep 1
-liwc_output <- read.csv(paste("LIWCOutput", "LIWCOutput.csv", sep="/"))
+liwc_output <- read_csv("LIWCOutput/LIWCOutput.csv")
+view(liwc_output)
 
 # Merge df_results and cleaned_essentia
-merged_df1 <- merge(df_results, cleaned_essentia)
-dim(merged_df1)
-
-# Now merge merged_df1 with liwc_output
-merged_df <- merge(merged_df1, liwc_output)
-dim(merged_df)
+merged_df <- df_results |>
+  left_join(cleaned_essentia) |>
+  left_join(liwc_output)
 
 # View the merged data frame
 View(merged_df)
+dim(merged_df)
 
 #substep 3
-colnames(merged_df)[colnames(merged_df) == "function."] <- "funct"
+merged_df <- merged_df |>
+  rename(funct = 'function')
+
+"funct" %in% colnames(merged_df)
