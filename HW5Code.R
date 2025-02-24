@@ -12,62 +12,74 @@
 # Step 0: install the stringr and jsonlite packages for R
 ##############################################################################
 
-library("stringr")
 library("jsonlite")
+library("tidyverse")
+
+##############################################################################
+# Step 1: Work with the song Au Revoir on the Talon of the Hawk album
+##############################################################################
+
+#Substep 1
+current.filename <- "The Front Bottoms-Talon Of The Hawk-Au Revoir (Adios).json"
+
+#Substep 2
+file_parts <- str_split(current.filename, "-", simplify=TRUE)
+artist <- file_parts[1]
+album <- file_parts[2]
+track <- file_parts [3]
+track <- file_parts[3] |>
+  str_remove(".json$")
+
+#Substep 3
+json_data <- fromJSON(file.path("EssentiaOutput", current.filename))
+
+#Substep 4
+overall_loudness <- json_data$loudness_ebu128$integrated
+spectral_energy <- json_data$lowlevel$spectral_energy
+dissonance <- json_data$lowlevel$dissonance
+pitch_salience <- json_data$lowlevel$pitch_salience
+bpm <-json_data$rhythm$bpm
+beats_loudness <- json_data$rhythm$beats_loudness
+danceability <- json_data$rhythm$danceability
+tuning_frequency <- json_data$tonal$tuning_frequency
 
 ##############################################################################
 # Step 2: complete step 1 for all .JSON files in the EssentiaOutput Folder
 ##############################################################################
 
-json_files <- list.files(paste("EssentiaOutput", sep="/"),pattern="\\.json$") # Find all JSON files
+json_files <- list.files("EssentiaOutput", pattern="\\.json$", full.names=TRUE) # Find all JSON files
 
-#initialize an empty data frame to store the results
-df_results <- data.frame(artist = rep(x = NA, times=length(json_files)),
-                         album = rep(x = NA, times=length(json_files)),
-                         track = rep(x = NA, times=length(json_files)),
-                         overall_loudness = rep(x = NA, times=length(json_files)),
-                         spectral_energy = rep(x = NA, times=length(json_files)),
-                         dissonance = rep(x = NA, times=length(json_files)),
-                         pitch_salience = rep(x = NA, times=length(json_files)),
-                         bpm = rep(x = NA, times=length(json_files)),
-                         beats_loudness = rep(x = NA, times=length(json_files)),
-                         danceability = rep(x = NA, times=length(json_files)),
-                         tuning_frequency = rep(x = NA, times=length(json_files)))
+# function to extract data in each JSON file
+df_results <- json_files %>%
+  map_df(~{
+    json_data <- fromJSON(.x)
+    
+    file_parts <- str_split(basename(.x), "-", simplify=TRUE)
+    artist <- file_parts[1]
+    album <- file_parts[2]
+    track <- file_parts [3]
+    track <- file_parts[3] |>
+      str_remove(".json$")
+    
+    #extract the features
+    tibble(
+      artist = artist,
+      album = album,
+      track = track,
+      overall.loudness = json_data$lowlevel$loudness_ebu128$integrated,
+      spectral_energy = json_data$lowlevel$spectral_energy,
+      dissonance = json_data$lowlevel$dissonance,
+      pitch_salience = json_data$lowlevel$pitch_salience,
+      bpm = json_data$rhythm$bpm,
+      beats_loudness = json_data$rhythm$beats_loudness,
+      danceability = json_data$rhythm$danceability,
+      tuning_frequency = json_data$tonal$tuning_frequency
+    )
+    
+  })
 
-for (i in 1:length(json_files)) {
-  json_file <- json_files[i]
-  file_parts <- str_split(json_file, "-", simplify=T)
-  artist <- file_parts[1]
-  album <- file_parts[2]
-  track <- file_parts [3]
-  track <- str_sub (track, start=1, end=str_length(track)-5) # Remove .json
+view(df_results)
   
-  # load JSON data
-  json_data <- fromJSON(paste("EssentiaOutput", json_file, sep="/"))
-  
-  #Step 3: extract the required features
-  overall.loudness <- json_data$lowlevel$loudness_ebu128$integrated
-  spectral_energy <- json_data$lowlevel$spectral_energy
-  dissonance <- json_data$lowlevel$dissonance
-  pitch_salience <- json_data$lowlevel$pitch_salience
-  bpm <- json_data$rhythm$bpm
-  beats_loudness <- json_data$rhythm$beats_loudness
-  danceability <- json_data$rhythm$danceability
-  tuning_frequency <- json_data$tonal$tuning_frequency
-  
-  df_results[i, ] <- c(artist, 
-                       album, 
-                       track,
-                       overall_loudness,
-                       spectral_energy,
-                       dissonance,
-                       pitch_salience,
-                       bpm,
-                       beats_loudness,
-                       danceability,
-                       tuning_frequency)
-}
-View(df_results)
 
 ##############################################################################
 # Step 3: Load and clean the data from the Essentia models by completing the 
